@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from ipaddress import ip_address
 
 class InvalidSecurityEventError(ValueError):
     pass
@@ -26,6 +27,17 @@ def parse_security_event(raw_event: dict) -> SecurityEvent:
     if missing_fields:
         fields = ", ".join(sorted(missing_fields))
         raise InvalidSecurityEventError(f"Missing required fields: {fields}")
+    
+    try:
+        ip_address(raw_event["source_ip"])
+    except ValueError as error:
+        raise InvalidSecurityEventError("source_ip must be a valid IP address") from error
+    
+    if not isinstance(raw_event["failed_attempts"], int):
+        raise InvalidSecurityEventError("failed_attempts must be an integer")
+    
+    if raw_event["failed_attempts"] < 0:
+        raise InvalidSecurityEventError("failed_attempts cannot be negative")
     
     return SecurityEvent(
         event_type=raw_event["event_type"],
