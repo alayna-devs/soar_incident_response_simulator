@@ -13,3 +13,12 @@ def calculate_risk_score(event: SecurityEvent) -> int:
         score += 30
         
     return score
+
+def classify_severity(score: int) -> str:
+    if score >= 80:
+        return "HIGH"
+    
+    if score >= 40:
+        return "MEDIUM"
+    
+    return "LOW"
